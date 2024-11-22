@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Serial Number Checker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    label, input, button, p {
+      display: block;
+      margin: 10px 0;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+  </style>
+  <script>
+    async function checkSerial(event) {
+      event.preventDefault();
+
+      const serialInput = document.getElementById('serialInput').value.trim();
+      const outputDiv = document.getElementById('output');
+
+      // Validate input (15 digits numeric only)
+      if (!/^\d{15}$/.test(serialInput)) {
+        outputDiv.textContent = 'Please enter a valid 15-digit serial number.';
+        outputDiv.className = 'error';
+        return;
+      }
+
+      // GitHub raw CSV file URL
+      const url = 'https://raw.githubusercontent.com/NMonda/sempre/refs/heads/main/Serial.csv';
+
+      try {
+        // Fetch the CSV file
+        const response = await fetch(url);
+        const csvData = await response.text();
+
+        // Parse CSV
+        const rows = csvData.split('\n').map(row => row.trim());
+
+        // Check if the serial number exists in the CSV
+        const serialExists = rows.some(row => row === serialInput);
+
+        if (serialExists) {
+          outputDiv.textContent = `Serial number ${serialInput} is available.`;
+          outputDiv.className = 'success';
+        } else {
+          outputDiv.textContent = `Serial number ${serialInput} is NOT available.`;
+          outputDiv.className = 'error';
+        }
+
+      } catch (error) {
+        outputDiv.textContent = 'Error: ' + error.message;
+        outputDiv.className = 'error';
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Serial Number Checker</h1>
+    <form id="serialForm" onsubmit="checkSerial(event);">
+      <label for="serialInput">Enter Serial Number:</label>
+      <input type="text" id="serialInput" placeholder="Enter 15-digit Serial Number" required>
+      <button type="submit">Check Serial</button>
+    </form>
+    <p id="output"></p>
+  </div>
+</body>
+</html>
